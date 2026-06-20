@@ -1,17 +1,21 @@
+import '../ffi/devguard_ffi.dart';
+import '../internal/_obf.dart';
 import '../models/device_metadata.dart';
 import '../models/guard_response.dart';
 import '../models/license_status.dart';
-import 'package:flutter/foundation.dart';
 
 class GuardEnforcement {
   static GuardResponse apply(GuardResponse response, DeviceMetadata metadata) {
-    if (response.blockEmulators && !metadata.isPhysicalDevice) {
-      debugPrint('DevGuard: Emulator blocked by project policy.');
+    final code = DevGuardFFI.evaluatePolicy(
+      blockEmulators: response.blockEmulators,
+      isPhysicalDevice: metadata.isPhysicalDevice,
+      isCompromised: false,
+    );
+    if (code == PolicyLock.emulator) {
       return response.copyWith(
         status: LicenseStatus.locked,
-        title: 'Emulator Detected',
-        message:
-            'This application cannot run on emulators or simulators for security reasons.',
+        title: Obf.emulatorTitle,
+        message: Obf.emulatorMessage,
       );
     }
     return response;

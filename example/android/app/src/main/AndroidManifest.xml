@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="DevGuard Example"
+        android:label="dev_guard_ffi_tmp_example"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

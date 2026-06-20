@@ -1,19 +1,19 @@
 #
 # To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html.
+# Run `pod lib lint dev_guard_ffi_tmp.podspec` to validate before publishing.
 #
 Pod::Spec.new do |s|
   s.name             = 'dev_guard'
-  s.version          = '1.0.0'
+  s.version          = '1.0.1'
   s.summary          = 'Remote licensing and app protection for Flutter.'
   s.description      = <<-DESC
-DevGuard Flutter plugin with native FFI security (HMAC signing, gzip telemetry tunnel),
-lock screens, warning banners, remote wipe, and hardware fingerprinting.
+DevGuard secures Flutter apps with HMAC-signed REST sync, native FFI, lock screens, and remote governance.
                        DESC
   s.homepage         = 'https://github.com/DevGuard-uk/dev_guard'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'DevGuard' => 'support@devguard.uk' }
+  s.author           = { 'DevGuard' => 'contact@devguard.uk' }
 
-  s.source           = { :git => 'https://github.com/DevGuard-uk/dev_guard.git', :tag => 'v#{s.version}' }
+  s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.vendored_frameworks = 'Frameworks/devguard_core.xcframework'
   s.dependency 'Flutter'

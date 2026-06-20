@@ -180,7 +180,7 @@ static void _token_scramble(const char* input, char* output, size_t len) {
     }
 }
 
-DEVGUARD_EXPORT void generate_signature(const char* project_id, long long timestamp, char* output) {
+DEVGUARD_EXPORT void dg_x9(const char* project_id, long long timestamp, char* output) {
     // Validate project_id length to prevent buffer truncation
     size_t pid_len = strlen(project_id);
     if (pid_len == 0 || pid_len > 200) {
@@ -206,7 +206,7 @@ DEVGUARD_EXPORT void generate_signature(const char* project_id, long long timest
     output[64] = '\0';
 }
 
-DEVGUARD_EXPORT int verify_response(const char* response_body, const char* signature) {
+DEVGUARD_EXPORT int dg_v2(const char* response_body, const char* signature) {
     char secret_key[64];
     _reconstruct_key(secret_key);
 
@@ -226,20 +226,20 @@ DEVGUARD_EXPORT int verify_response(const char* response_body, const char* signa
 }
 
 // Secure token scrambling for in-memory protection
-DEVGUARD_EXPORT void secure_save_token(const char* token, char* output) {
+DEVGUARD_EXPORT void dg_s3(const char* token, char* output) {
     size_t len = strlen(token);
     _token_scramble(token, output, len);
     output[len] = '\0';
 }
 
-DEVGUARD_EXPORT void secure_get_token(const char* scrambled, char* output) {
+DEVGUARD_EXPORT void dg_g4(const char* scrambled, char* output) {
     size_t len = strlen(scrambled);
     _token_scramble(scrambled, output, len);
     output[len] = '\0';
 }
 
 // SHA-256 hex digest of an arbitrary UTF-8 string (license keys, fingerprints).
-DEVGUARD_EXPORT void hash_sha256_hex(const char* input, char* output) {
+static void _hash_sha256_hex(const char* input, char* output) {
     if (input == NULL || output == NULL) {
         if (output) output[0] = '\0';
         return;
@@ -258,7 +258,11 @@ DEVGUARD_EXPORT void hash_sha256_hex(const char* input, char* output) {
 }
 
 // Symmetric XOR transform. output must hold at least input_len bytes.
-DEVGUARD_EXPORT void xor_transform(
+DEVGUARD_EXPORT void dg_h5(const char* input, char* output) {
+    _hash_sha256_hex(input, output);
+}
+
+DEVGUARD_EXPORT void dg_x6(
     const char* input,
     size_t input_len,
     const char* key,
@@ -275,19 +279,19 @@ DEVGUARD_EXPORT void xor_transform(
 }
 
 // Derive a 64-char hex key from passcode + salt (usage log encryption).
-DEVGUARD_EXPORT void derive_log_key(const char* passcode, const char* salt, char* output) {
+DEVGUARD_EXPORT void dg_d7(const char* passcode, const char* salt, char* output) {
     char combined[512];
     snprintf(combined, sizeof(combined), "%s_%s",
              passcode != NULL ? passcode : "secure_default",
              salt != NULL ? salt : "salt");
-    hash_sha256_hex(combined, output);
+    _hash_sha256_hex(combined, output);
 }
 
 #if defined(__APPLE__)
 #include <sys/sysctl.h>
 
 // Returns total RAM in megabytes on Apple platforms, or -1 on failure.
-DEVGUARD_EXPORT int get_total_ram_mb(void) {
+DEVGUARD_EXPORT int dg_r8(void) {
     int64_t mem = 0;
     size_t len = sizeof(mem);
     if (sysctlbyname("hw.memsize", &mem, &len, NULL, 0) != 0) {
@@ -296,7 +300,18 @@ DEVGUARD_EXPORT int get_total_ram_mb(void) {
     return (int)(mem / (1024 * 1024));
 }
 #else
-DEVGUARD_EXPORT int get_total_ram_mb(void) {
+DEVGUARD_EXPORT int dg_r8(void) {
     return -1;
 }
 #endif
+
+// Policy gate: 0=allow, 1=emulator block, 2=compromised device block
+DEVGUARD_EXPORT int dg_e1(int block_emulators, int is_physical, int is_compromised) {
+    if (is_compromised) {
+        return 2;
+    }
+    if (block_emulators && !is_physical) {
+        return 1;
+    }
+    return 0;
+}

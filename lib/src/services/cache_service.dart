@@ -1,10 +1,11 @@
 import 'dart:convert';
+import '../internal/_obf.dart';
 import '../ffi/devguard_ffi.dart';
 import '../models/guard_response.dart';
 import 'secure_storage_service.dart';
 
 class CacheService {
-  static const String _key = 'dev_guard_cache';
+  static final String _key = Obf.cacheKey;
   final String? _projectId;
 
   CacheService({String? projectId}) : _projectId = projectId;
@@ -52,13 +53,13 @@ class CacheService {
   }
 
   Future<int?> getLastWipeNonce() async {
-    final val = await SecureStorageService.read('dev_guard_last_wipe_nonce');
+    final val = await SecureStorageService.read(Obf.wipeNonceKey);
     return val != null ? int.tryParse(val) : null;
   }
 
   Future<void> setLastWipeNonce(int nonce) async {
     await SecureStorageService.write(
-      'dev_guard_last_wipe_nonce',
+      Obf.wipeNonceKey,
       nonce.toString(),
     );
   }

@@ -1,5 +1,5 @@
-name: dev_guard_example
-description: "Demonstrates how to use the dev_guard Flutter plugin."
+name: dev_guard_ffi_tmp_example
+description: "Demonstrates how to use the dev_guard_ffi_tmp plugin."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: "none" # Remove this line if you wish to publish to pub.dev

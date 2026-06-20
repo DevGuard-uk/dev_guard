@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../ffi/devguard_ffi.dart';
+import '../internal/_obf.dart';
 import '../models/device_metadata.dart';
 import '../models/guard_response.dart';
 import '../models/status_fetch_result.dart';
@@ -11,12 +12,26 @@ import 'status_checker.dart';
 
 class RestChecker implements StatusChecker {
   final String baseUrl;
-
-  /// The developer Master Secret, sent as the `X-DevGuard-API-Key` header
-  /// so the server can authenticate requests against the account.
   final String? secret;
 
   RestChecker({required this.baseUrl, this.secret});
+
+  Map<String, String> _authHeaders({
+    required String signature,
+    required int timestamp,
+    bool includeTunnel = false,
+  }) {
+    final headers = <String, String>{
+      Obf.contentType: Obf.appJson,
+      Obf.hdrSig: signature,
+      Obf.hdrTs: timestamp.toString(),
+      Obf.hdrApiKey: secret ?? '',
+    };
+    if (includeTunnel) {
+      headers[Obf.hdrTunnel] = Obf.tunnelV1;
+    }
+    return headers;
+  }
 
   @override
   Future<StatusFetchResult> fetchStatus(
@@ -33,36 +48,31 @@ class RestChecker implements StatusChecker {
       final encodedPayload = base64Encode(compressed);
 
       final body = {
-        'projectId': projectId,
-        'deviceId': metadata?.deviceId,
-        'version': metadata?.appVersion,
-        'isPhysicalDevice': metadata?.isPhysicalDevice,
-        'location': metadata?.location,
-        'p': encodedPayload,
+        Obf.projectId: projectId,
+        Obf.deviceId: metadata?.deviceId,
+        Obf.version: metadata?.appVersion,
+        Obf.isPhysicalDevice: metadata?.isPhysicalDevice,
+        Obf.location: metadata?.location,
+        Obf.payloadField: encodedPayload,
       };
 
       final response = await http
           .post(
             Uri.parse(baseUrl),
-            headers: {
-              'Content-Type': 'application/json',
-              'X-DevGuard-Signature': signature,
-              'X-DevGuard-Timestamp': timestamp.toString(),
-              'X-DevGuard-Tunnel': 'v1-gzip',
-              'X-DevGuard-API-Key': secret ?? '',
-            },
+            headers: _authHeaders(
+              signature: signature,
+              timestamp: timestamp,
+              includeTunnel: true,
+            ),
             body: jsonEncode(body),
           )
           .timeout(const Duration(seconds: 50));
 
       if (response.statusCode == 200) {
-        final serverSignature =
-            response.headers['x-devguard-response-signature'];
+        final serverSignature = response.headers[Obf.respSig];
 
         if (serverSignature == null) {
-          DevGuardLogger.warning(
-            'DevGuard Security Alert: Missing server response signature.',
-          );
+          DevGuardLogger.warning(Obf.missingSigLog);
           return const StatusFetchResult(
             failure: StatusFetchFailure.signatureMismatch,
           );
@@ -71,15 +81,13 @@ class RestChecker implements StatusChecker {
         if (!DevGuardFFI.verifyResponse(response.body, serverSignature)) {
           final data = jsonDecode(response.body);
           if (data is Map &&
-              data['betaFeatures'] is Map &&
-              data['betaFeatures']['bypassSignature'] == true) {
-            DevGuardLogger.warning(
-              'DevGuard Security Warning: Invalid server response signature, but bypassSignature is ACTIVE.',
-            );
+              data[Obf.betaFeatures] is Map &&
+              data[Obf.betaFeatures][Obf.bypassSignature] == true) {
+            DevGuardLogger.warning(Obf.invalidSigBypassLog);
           } else {
             DevGuardLogger.error(
-              'DevGuard Security Alert: Invalid server response signature! Possible tampering detected.',
-              context: 'RestSignatureVerify',
+              Obf.invalidSigLog,
+              context: Obf.ctxRestSigVerify,
             );
             return const StatusFetchResult(
               failure: StatusFetchFailure.signatureMismatch,
@@ -103,7 +111,7 @@ class RestChecker implements StatusChecker {
       DevGuardLogger.warning('DevGuard Warning: Sync timed out after 50 seconds.');
       return const StatusFetchResult(failure: StatusFetchFailure.timeout);
     } catch (e, st) {
-      DevGuardLogger.error(e, stackTrace: st, context: 'RestFetchStatus');
+      DevGuardLogger.error(e, stackTrace: st, context: Obf.ctxRestFetchStatus);
       return const StatusFetchResult(failure: StatusFetchFailure.networkError);
     }
   }
@@ -112,10 +120,11 @@ class RestChecker implements StatusChecker {
   Future<bool> verifyAndUnlock(String projectId, String hashedKey) async {
     try {
       final uri = Uri.parse(baseUrl);
+      final unlockSegment = Obf.unlock;
       final unlockUri = uri.replace(
         path: uri.path.endsWith('/')
-            ? '${uri.path}unlock'
-            : '${uri.path}/unlock',
+            ? '${uri.path}$unlockSegment'
+            : '${uri.path}/$unlockSegment',
       );
 
       final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -123,31 +132,28 @@ class RestChecker implements StatusChecker {
 
       final response = await http.post(
         unlockUri,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-DevGuard-Signature': signature,
-          'X-DevGuard-Timestamp': timestamp.toString(),
-          'X-DevGuard-API-Key': secret ?? '',
-        },
-        body: jsonEncode({'projectId': projectId, 'providedKey': hashedKey}),
+        headers: _authHeaders(signature: signature, timestamp: timestamp),
+        body: jsonEncode({
+          Obf.projectId: projectId,
+          Obf.providedKey: hashedKey,
+        }),
       );
 
       if (response.statusCode == 200) {
-        final serverSignature =
-            response.headers['x-devguard-response-signature'];
+        final serverSignature = response.headers[Obf.respSig];
         if (serverSignature == null ||
             !DevGuardFFI.verifyResponse(response.body, serverSignature)) {
           DevGuardLogger.error(
-            'DevGuard Security Alert: Unlock response signature verification failed!',
-            context: 'RestUnlockVerify',
+            Obf.unlockSigFailLog,
+            context: Obf.ctxRestUnlockVerify,
           );
           return false;
         }
-        return response.body == 'Unlocked';
+        return response.body == Obf.unlocked;
       }
       return false;
     } catch (e, st) {
-      DevGuardLogger.error(e, stackTrace: st, context: 'RestUnlock');
+      DevGuardLogger.error(e, stackTrace: st, context: Obf.ctxRestUnlock);
       return false;
     }
   }

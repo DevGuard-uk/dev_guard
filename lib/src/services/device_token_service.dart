@@ -1,3 +1,4 @@
+import '../internal/_obf.dart';
 import '../ffi/devguard_ffi.dart';
 import 'secure_storage_service.dart';
 
@@ -5,8 +6,8 @@ import 'secure_storage_service.dart';
 /// all standard wipe operations (cache clear, log clear, remote wipe).
 /// Only a dedicated `revokeToken` remote command can remove it.
 class DeviceTokenService {
-  static const String _tokenKey = 'dev_guard_device_registration_token';
-  static const String _fingerprintKey = 'dev_guard_device_fingerprint';
+  static final String _tokenKey = Obf.tokenKey;
+  static final String _fingerprintKey = Obf.fingerprintKey;
   
   /// Returns the locally stored registration token, or null if unregistered.
   static Future<String?> getToken() async {

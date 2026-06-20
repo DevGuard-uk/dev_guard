@@ -1,4 +1,5 @@
 import 'license_status.dart';
+import 'lock_screen_branding.dart';
 
 class GuardResponse {
   final LicenseStatus status;
@@ -28,6 +29,9 @@ class GuardResponse {
   /// When true, emulators/simulators are blocked client-side.
   final bool blockEmulators;
 
+  /// Workspace white-label branding (Enterprise plan).
+  final LockScreenBranding? branding;
+
   const GuardResponse({
     required this.status,
     this.title,
@@ -47,6 +51,7 @@ class GuardResponse {
     this.pingInterval = 5,
     this.syncPolicy = 'immediate',
     this.blockEmulators = false,
+    this.branding,
   });
 
   factory GuardResponse.fromJson(Map<String, dynamic> json) {
@@ -75,6 +80,11 @@ class GuardResponse {
       pingInterval: _parsePingInterval(json['pingInterval']),
       syncPolicy: (json['syncPolicy'] as String?) ?? 'immediate',
       blockEmulators: json['blockEmulators'] == true,
+      branding: json['branding'] is Map
+          ? LockScreenBranding.fromJson(
+              Map<String, dynamic>.from(json['branding'] as Map),
+            )
+          : null,
     );
   }
 
@@ -120,6 +130,14 @@ class GuardResponse {
       'pingInterval': pingInterval,
       'syncPolicy': syncPolicy,
       'blockEmulators': blockEmulators,
+      if (branding != null) 'branding': {
+        'brandName': branding!.brandName,
+        'logoUrl': branding!.logoUrl,
+        'primaryColor': branding!.primaryColor,
+        'accentColor': branding!.accentColor,
+        'websiteUrl': branding!.websiteUrl,
+        'hidePoweredBy': branding!.hidePoweredBy,
+      },
     };
   }
 
