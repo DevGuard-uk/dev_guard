@@ -1,20 +1,25 @@
 #include <stdint.h>
+#include <stddef.h>
 
-// Forward declaration of the native functions
-void generate_signature(const char* project_id, int64_t timestamp, char* output);
-int verify_response(const char* response_body, const char* signature);
-void hash_sha256_hex(const char* input, char* output);
-void xor_transform(const char* input, size_t input_len, const char* key, size_t key_len, char* output);
-void derive_log_key(const char* passcode, const char* salt, char* output);
-int get_total_ram_mb(void);
+void dg_x9(const char* project_id, int64_t timestamp, char* output);
+int dg_v2(const char* response_body, const char* signature);
+void dg_s3(const char* token, char* output);
+void dg_g4(const char* scrambled, char* output);
+void dg_h5(const char* input, char* output);
+void dg_x6(const char* input, size_t input_len, const char* key, size_t key_len, char* output);
+void dg_d7(const char* passcode, const char* salt, char* output);
+int dg_r8(void);
+int dg_e1(int block_emulators, int is_physical, int is_compromised);
 
-// Ensures the linker includes symbols from the static library for FFI lookup.
 void devguard_dummy_reference() {
     char buf[65];
-    generate_signature("", 0, buf);
-    verify_response("", "");
-    hash_sha256_hex("", buf);
-    xor_transform("", 0, "", 0, buf);
-    derive_log_key("", "", buf);
-    get_total_ram_mb();
+    dg_x9("", 0, buf);
+    dg_v2("", "");
+    dg_s3("", buf);
+    dg_g4("", buf);
+    dg_h5("", buf);
+    dg_x6("", 0, "", 0, buf);
+    dg_d7("", "", buf);
+    dg_r8();
+    dg_e1(0, 1, 0);
 }

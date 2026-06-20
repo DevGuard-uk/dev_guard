@@ -1,11 +1,12 @@
 import 'dart:convert';
+import '../internal/_obf.dart';
 import '../ffi/devguard_ffi.dart';
 import '../models/guard_response.dart';
 import 'dev_guard_logger.dart';
 import 'secure_storage_service.dart';
 
 class UsageLogger {
-  static const String _key = 'dev_guard_usage_logs';
+  static final String _key = Obf.usageLogsKey;
   static String? _sessionPasscode;
   static GuardResponse? Function()? _responseProvider;
 
@@ -51,7 +52,7 @@ class UsageLogger {
     final effectivePasscode = passcode ?? _sessionPasscode;
     final keyHex = DevGuardFFI.deriveLogKeyHex(
       passcode: effectivePasscode ?? response?.diagnosticPasscodeHash,
-      salt: response?.title ?? 'salt',
+      salt: response?.title ?? Obf.saltDefault,
     );
     return DevGuardFFI.xorTransform(utf8.encode(text), _hexToBytes(keyHex));
   }
@@ -77,7 +78,7 @@ class UsageLogger {
           DevGuardFFI.deriveLogKeyHex(
             passcode:
                 passcode ?? _sessionPasscode ?? response?.diagnosticPasscodeHash,
-            salt: response?.title ?? 'salt',
+            salt: response?.title ?? Obf.saltDefault,
           ),
         ),
       );

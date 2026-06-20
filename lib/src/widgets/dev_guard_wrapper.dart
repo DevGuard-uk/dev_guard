@@ -157,6 +157,7 @@ class _DevGuardWrapperState extends State<DevGuardWrapper>
           contactPhone: _response.contactPhone,
           contactWhatsapp: _response.contactWhatsapp,
           allowUnlock: _response.allowUnlock,
+          branding: _response.branding,
           onUnlock: _handleUnlock,
         ),
       );

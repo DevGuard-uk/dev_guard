@@ -3,13 +3,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_vault_logger/flutter_vault_logger.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../ffi/devguard_ffi.dart';
+import '../internal/_obf.dart';
 
 /// Internal logging service for DevGuard.
 /// 
 /// Uses [flutter_vault_logger] for Errors and Warnings, and a custom
 /// encrypted Hive box for Info logs.
 class DevGuardLogger {
-  static const String _infoBoxName = 'dev_guard_info_logs';
+  static final String _infoBoxName = Obf.infoBoxName;
   
   static bool _initialized = false;
   static bool showConsoleLogs = false; // Hidden until Authorized Diagnostic
@@ -29,7 +30,7 @@ class DevGuardLogger {
         encryptionKey: vaultKey,
         encryptionIV: vaultIV,
         maxLogCount: 1000,
-        fileExtension: 'dgerr',
+        fileExtension: Obf.errExt,
       ));
 
       // 2. Initialize Info Vault (Custom Hive Box)
@@ -48,7 +49,7 @@ class DevGuardLogger {
 
   static void enableConsoleLogs() {
     showConsoleLogs = true;
-    debugPrint('[DevGuard] [DEBUG] Console logs enabled via Diagnostic Authorization.');
+    debugPrint('${Obf.logTag} [DEBUG] Console logs enabled via Diagnostic Authorization.');
   }
 
   static void info(String message, {Map<String, dynamic>? data}) {
@@ -83,7 +84,7 @@ class DevGuardLogger {
 
   static void _log(String message, {required String level, Map<String, dynamic>? data}) {
     final timestamp = DateTime.now();
-    final formatted = '[DevGuard] [$level] $message ${data != null ? jsonEncode(data) : ""}';
+    final formatted = '${Obf.logTag} [$level] $message ${data != null ? jsonEncode(data) : ""}';
     
     if (showConsoleLogs) {
       debugPrint(formatted);
@@ -148,7 +149,7 @@ class DevGuardLogger {
   static String _deriveVaultKey(String deviceId) {
     final hex = DevGuardFFI.deriveLogKeyHex(
       passcode: deviceId,
-      salt: 'dg_vault_key_v1',
+      salt: Obf.vaultKeySalt,
     );
     return String.fromCharCodes(_hexToBytes(hex));
   }
@@ -156,7 +157,7 @@ class DevGuardLogger {
   static String _deriveVaultIV(String deviceId) {
     final hex = DevGuardFFI.deriveLogKeyHex(
       passcode: deviceId,
-      salt: 'dg_vault_iv_v1',
+      salt: Obf.vaultIvSalt,
     );
     return String.fromCharCodes(_hexToBytes(hex).take(16));
   }

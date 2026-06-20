@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:ffi/ffi.dart';
+import '../internal/_obf.dart';
 
 typedef _GenerateSignatureC = Void Function(
   Pointer<Utf8> projectId,
@@ -59,6 +60,9 @@ typedef _DeriveLogKeyDart = void Function(
 typedef _GetTotalRamMbC = Int32 Function();
 typedef _GetTotalRamMbDart = int Function();
 
+typedef _EvaluatePolicyC = Int32 Function(Int32 blockEmulators, Int32 isPhysical, Int32 isCompromised);
+typedef _EvaluatePolicyDart = int Function(int blockEmulators, int isPhysical, int isCompromised);
+
 class DevGuardFFI {
   static DynamicLibrary? _lib;
   static _GenerateSignatureDart? _generateSignatureFunc;
@@ -69,6 +73,7 @@ class DevGuardFFI {
   static _XorTransformDart? _xorTransformFunc;
   static _DeriveLogKeyDart? _deriveLogKeyFunc;
   static _GetTotalRamMbDart? _getTotalRamMbFunc;
+  static _EvaluatePolicyDart? _evaluatePolicyFunc;
 
   static bool _initialized = false;
   static bool _nativeAvailable = false;
@@ -91,34 +96,37 @@ class DevGuardFFI {
 
     try {
       if (Platform.isAndroid) {
-        _lib = DynamicLibrary.open('libdevguard_core.so');
+        _lib = DynamicLibrary.open(Obf.nativeLib);
       } else if (Platform.isIOS || Platform.isMacOS) {
         _lib = DynamicLibrary.process();
       }
 
       _generateSignatureFunc = _lib!.lookupFunction<_GenerateSignatureC, _GenerateSignatureDart>(
-        'generate_signature',
+        Obf.symX9,
       );
       _verifyResponseFunc = _lib!.lookupFunction<_VerifyResponseC, _VerifyResponseDart>(
-        'verify_response',
+        Obf.symV2,
       );
       _secureSaveTokenFunc = _lib!.lookupFunction<_SecureTokenC, _SecureTokenDart>(
-        'secure_save_token',
+        Obf.symS3,
       );
       _secureGetTokenFunc = _lib!.lookupFunction<_SecureTokenC, _SecureTokenDart>(
-        'secure_get_token',
+        Obf.symG4,
       );
       _hashSha256Func = _lib!.lookupFunction<_HashSha256C, _HashSha256Dart>(
-        'hash_sha256_hex',
+        Obf.symH5,
       );
       _xorTransformFunc = _lib!.lookupFunction<_XorTransformC, _XorTransformDart>(
-        'xor_transform',
+        Obf.symX6,
       );
       _deriveLogKeyFunc = _lib!.lookupFunction<_DeriveLogKeyC, _DeriveLogKeyDart>(
-        'derive_log_key',
+        Obf.symD7,
       );
       _getTotalRamMbFunc = _lib!.lookupFunction<_GetTotalRamMbC, _GetTotalRamMbDart>(
-        'get_total_ram_mb',
+        Obf.symR8,
+      );
+      _evaluatePolicyFunc = _lib!.lookupFunction<_EvaluatePolicyC, _EvaluatePolicyDart>(
+        Obf.symE1,
       );
       _nativeAvailable = true;
     } catch (_) {
@@ -250,8 +258,8 @@ class DevGuardFFI {
   static String deriveLogKeyHex({String? passcode, String? salt}) {
     if (!_initialized) init();
     if (_nativeAvailable) {
-      final ptrPasscode = (passcode ?? 'secure_default').toNativeUtf8();
-      final ptrSalt = (salt ?? 'salt').toNativeUtf8();
+      final ptrPasscode = (passcode ?? Obf.secureDefault).toNativeUtf8();
+      final ptrSalt = (salt ?? Obf.saltDefault).toNativeUtf8();
       final ptrOutput = calloc<Int8>(65).cast<Utf8>();
       try {
         _deriveLogKeyFunc!(ptrPasscode, ptrSalt, ptrOutput);
@@ -262,7 +270,7 @@ class DevGuardFFI {
         calloc.free(ptrOutput);
       }
     }
-    final combined = '${passcode ?? 'secure_default'}_${salt ?? 'salt'}';
+    final combined = '${passcode ?? Obf.secureDefault}_${salt ?? Obf.saltDefault}';
     return sha256.convert(utf8.encode(combined)).toString();
   }
 
@@ -271,6 +279,24 @@ class DevGuardFFI {
     if (!_nativeAvailable || _getTotalRamMbFunc == null) return null;
     final result = _getTotalRamMbFunc!();
     return result >= 0 ? result : null;
+  }
+
+  /// Returns [PolicyLock] code: allow, emulator, or compromised.
+  static int evaluatePolicy({
+    required bool blockEmulators,
+    required bool isPhysicalDevice,
+    required bool isCompromised,
+  }) {
+    if (!_initialized) init();
+    final block = blockEmulators ? 1 : 0;
+    final physical = isPhysicalDevice ? 1 : 0;
+    final compromised = isCompromised ? 1 : 0;
+    if (_nativeAvailable && _evaluatePolicyFunc != null) {
+      return _evaluatePolicyFunc!(block, physical, compromised);
+    }
+    if (isCompromised) return PolicyLock.compromised;
+    if (blockEmulators && !isPhysicalDevice) return PolicyLock.emulator;
+    return PolicyLock.allow;
   }
 
   static String _dartTokenScramble(String input) {

@@ -17,6 +17,7 @@ import 'services/sync_policy_service.dart';
 import 'services/usage_logger.dart';
 import 'services/device_token_service.dart';
 import 'services/guard_enforcement.dart';
+import 'internal/_obf.dart';
 import 'widgets/dev_guard_wrapper.dart';
 
 /// Defines how the plugin behaves when offline with no cache.
@@ -27,7 +28,7 @@ enum FailSafe {
 
 /// Core DevGuard engine. Use [DevGuard] static methods or hold an instance directly.
 class DevGuardInstance {
-  static const String defaultStatusUrl = 'https://api.devguard.uk/devguard';
+  static String get defaultStatusUrl => Obf.defaultApiUrl;
 
   static DevGuardInstance? _shared;
   static DevGuardInstance get shared => _shared ??= DevGuardInstance._();
@@ -93,7 +94,7 @@ class DevGuardInstance {
 
       Future.microtask(() => _backgroundInit(projectId));
     } catch (e, st) {
-      DevGuardLogger.error(e, stackTrace: st, context: 'CriticalInit');
+      DevGuardLogger.error(e, stackTrace: st, context: Obf.ctxCriticalInit);
       if (_cachedResponse == null) {
         _currentResponse = GuardResponse(
           status: LicenseStatus.active,
@@ -110,23 +111,25 @@ class DevGuardInstance {
 
       try {
         DevGuardFFI.init();
-        DevGuardLogger.info('DevGuard: Secure Enclave Protocol Activated.');
+        DevGuardLogger.info(Obf.enclaveActivated);
 
         final isJailbroken = await RootJailbreakGuard.jailbroken;
-        if (isJailbroken) {
-          DevGuardLogger.warning(
-            'DevGuard Security Alert: Compromised device detected.',
-          );
+        final policyCode = DevGuardFFI.evaluatePolicy(
+          blockEmulators: false,
+          isPhysicalDevice: true,
+          isCompromised: isJailbroken,
+        );
+        if (policyCode == PolicyLock.compromised) {
+          DevGuardLogger.warning(Obf.compromisedLog);
           _currentResponse = GuardResponse(
             status: LicenseStatus.locked,
-            title: 'Security Alert',
-            message:
-                'This application cannot run on jailbroken or rooted devices for security reasons.',
+            title: Obf.securityTitle,
+            message: Obf.compromisedMessage,
           );
           return;
         }
       } catch (e, st) {
-        DevGuardLogger.error(e, stackTrace: st, context: 'SecureEnclaveInit');
+        DevGuardLogger.error(e, stackTrace: st, context: Obf.ctxSecureEnclaveInit);
       }
 
       final cache = CacheService(projectId: projectId);
@@ -146,7 +149,7 @@ class DevGuardInstance {
           );
         }
       } catch (e, st) {
-        DevGuardLogger.error(e, stackTrace: st, context: 'CacheLoad');
+        DevGuardLogger.error(e, stackTrace: st, context: Obf.ctxCacheLoad);
       }
 
       try {
@@ -155,14 +158,14 @@ class DevGuardInstance {
         ).collect();
         DevGuardLogger.debug('DevGuard: Device ID: ${metadata.deviceId}');
       } catch (e, st) {
-        DevGuardLogger.error(e, stackTrace: st, context: 'MetadataInit');
+        DevGuardLogger.error(e, stackTrace: st, context: Obf.ctxMetadataInit);
       }
 
       await UsageLogger.logEvent('app_open');
       await syncStatus(trigger: 'appLaunch');
       _startHeartbeat();
     } catch (e, st) {
-      DevGuardLogger.error(e, stackTrace: st, context: 'BackgroundInit');
+      DevGuardLogger.error(e, stackTrace: st, context: Obf.ctxBackgroundInit);
     }
   }
 
@@ -266,14 +269,13 @@ class DevGuardInstance {
 
       if (fetchResult.isSignatureMismatch) {
         DevGuardLogger.error(
-          'DevGuard Security Alert: Response signature mismatch — locking app.',
-          context: 'syncStatus_signature',
+          Obf.responseSigLockLog,
+          context: Obf.ctxSyncSig,
         );
         _currentResponse = GuardResponse(
           status: LicenseStatus.locked,
-          title: 'Security Alert',
-          message:
-              'Server response verification failed. Possible tampering detected.',
+          title: Obf.securityTitle,
+          message: Obf.serverTamperMessage,
         );
         return;
       }
@@ -323,7 +325,7 @@ class DevGuardInstance {
         );
       }
     } catch (e, st) {
-      DevGuardLogger.error(e, stackTrace: st, context: 'syncStatus');
+      DevGuardLogger.error(e, stackTrace: st, context: Obf.ctxSyncStatus);
     }
   }
 

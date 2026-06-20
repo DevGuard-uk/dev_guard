@@ -4,6 +4,13 @@ import 'package:flutter/material.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Master Secret is required for all projects. Pass your secret from Settings → Master Secret:
+  //
+  //   await DevGuard.init(
+  //     projectId: 'your_project_id',
+  //     secret: 'YOUR_UNIQUE_SECRET',
+  //     failSafe: FailSafe.open,
+  //   );
   await DevGuard.init(
     projectId: 'your_project_id',
     secret: 'YOUR_MASTER_SECRET',
@@ -95,7 +102,7 @@ class MyApp extends StatelessWidget {
                 ),
               ),
             );
-          },
+          }
         ),
       ),
     );

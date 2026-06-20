@@ -1,6 +1,6 @@
 name: dev_guard
 description: "A high-performance remote licensing and app-protection plugin for Flutter. Secured by HMAC signatures and native FFI (Secure Enclave), it enables developers to remotely lock, warn, or sync applications via the DevGuard REST API."
-version: 1.0.0
+version: 1.0.1
 homepage: https://github.com/DevGuard-uk/dev_guard
 repository: https://github.com/DevGuard-uk/dev_guard
 issue_tracker: https://github.com/DevGuard-uk/dev_guard/issues
@@ -12,21 +12,22 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  android_id: ^0.4.0
+  android_id: ^0.5.1
   url_launcher: ^6.3.2
   crypto: ^3.0.7
   http: ^1.6.0
   ffi: ^2.2.0
-  package_info_plus: ^9.0.0
-  device_info_plus: ^12.2.0
-  battery_plus: ^6.1.1
-  connectivity_plus: ^6.0.5
-  geolocator: ^13.0.4
-  flutter_secure_storage: ^10.2.0
+  package_info_plus: ^10.1.0
+  device_info_plus: ^13.1.0
+  battery_plus: ^7.0.0
+  connectivity_plus: ^7.1.1
+  geolocator: ^14.0.3
+  flutter_secure_storage: ^10.3.1
   root_jailbreak_guard: ^1.0.0
-  flutter_vault_logger: ^0.1.1
+  flutter_vault_logger: ^0.1.2
   hive_flutter: ^1.1.0
   path_provider: ^2.1.5
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -40,3 +41,8 @@ flutter:
       ios:
         pluginClass: DevGuardPlugin
         ffiPlugin: true
+
+false_secrets:
+  - /example/android/app/google-services.json
+  - /example/ios/Runner/GoogleService-Info.plist
+  - /example/lib/firebase_options.dart
