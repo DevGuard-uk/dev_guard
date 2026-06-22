@@ -87,8 +87,8 @@ class DevGuardInstance {
 
       if (_cachedResponse == null) {
         _currentResponse = GuardResponse(
-          status: LicenseStatus.pending,
-          message: 'Verifying license status...',
+          status: LicenseStatus.active,
+          message: '',
         );
       }
 

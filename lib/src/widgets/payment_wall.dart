@@ -67,21 +67,9 @@ class _PaymentWallState extends State<PaymentWall> {
   @override
   Widget build(BuildContext context) {
     final branding = widget.branding;
-    final primary = Color(branding?.primaryColorValue ?? 0xFFD32F2F);
-    final accent = Color(branding?.accentColorValue ?? 0xFFB71C1C);
-    final hasCustomBranding =
-        branding != null &&
-        (branding.brandName?.isNotEmpty == true ||
-            branding.logoUrl?.isNotEmpty == true);
-    final footerBrand = hasCustomBranding
-        ? (branding.brandName?.trim().isNotEmpty == true
-              ? branding.brandName!.trim()
-              : Obf.brandDefault)
-        : Obf.brandDefault;
-    final footerUrl =
-        hasCustomBranding && branding.websiteUrl?.isNotEmpty == true
-        ? branding.websiteUrl!
-        : Obf.brandWebsite;
+    final footer = resolveBrandingFooter(branding);
+    final primary = Color(footer.primaryColorValue);
+    final accent = Color(footer.accentColorValue);
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -300,6 +288,7 @@ class _PaymentWallState extends State<PaymentWall> {
                                           color: Colors.white,
                                         ),
                                         autofocus: true,
+                                        obscureText: true,
                                         decoration: InputDecoration(
                                           hintText: Obf.licenseKeyHint,
                                           hintStyle: TextStyle(
@@ -393,22 +382,30 @@ class _PaymentWallState extends State<PaymentWall> {
                         ),
                       ),
 
-                      if (!(branding?.hidePoweredBy == true)) ...[
+                      if (!footer.hidePoweredBy) ...[
                         const SizedBox(height: 48),
                         InkWell(
                           onTap: () async {
-                            final url = Uri.parse(footerUrl);
+                            final url = Uri.parse(footer.url);
                             if (await canLaunchUrl(url)) {
                               await launchUrl(
                                 url,
                                 mode: LaunchMode.externalApplication,
+                              );
+                            } else if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Could not open the brand website.',
+                                  ),
+                                ),
                               );
                             }
                           },
                           child: Column(
                             children: [
                               Text(
-                                hasCustomBranding ? Obf.poweredBy : Obf.securedBy,
+                                footer.label,
                                 style: TextStyle(
                                   color: Colors.white.withValues(alpha: 0.3),
                                   fontSize: 11,
@@ -417,7 +414,7 @@ class _PaymentWallState extends State<PaymentWall> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                footerBrand.toUpperCase(),
+                                footer.brand.toUpperCase(),
                                 style: TextStyle(
                                   color: Colors.white.withValues(alpha: 0.6),
                                   fontWeight: FontWeight.w800,

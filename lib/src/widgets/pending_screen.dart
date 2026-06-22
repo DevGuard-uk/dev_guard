@@ -23,7 +23,7 @@ class PendingScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              message.isNotEmpty ? message : 'Verifying license status...',
+              message.isNotEmpty ? message : '',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.8),
