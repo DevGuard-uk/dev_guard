@@ -31,13 +31,13 @@ The Lock Screen, warning banner, and diagnostics overlay are all **built in** �
 ## ✨ Features
 
 - **Glassmorphic Lock Screen**: Premium, built-in UI that blocks access instantly — with your WhatsApp / Email / Call support buttons and an optional unlock-key entry.
-- **Native Security**: Native signing and the secret are handled in compiled C++ to prevent secret extraction.
+- **Native Security**: HMAC signing and the shared secret are handled in compiled C++ (`devguard_core`) to prevent secret extraction.
 - **GZip Tunneling**: Compact telemetry payloads for minimum data usage.
 - **Remote Config**: Access server-defined JSON settings via `GuardResponse.extraData` and `betaFeatures`.
 - **Heartbeat & Sync**: Automated background pings (with `lifecycleSync` / `syncPolicy` support) to keep license status fresh.
 - **Hardware Fingerprinting**: Robust device identity that survives app re-installs.
 - **Emulator Blocking**: When the project enables `blockEmulators`, the SDK locks on emulators/simulators automatically.
-- **Hardened Remote Wipe**: Nonce-based remote wipe clears the response cache, usage logs, encrypted vault diagnostics, and stored device-user identity.
+- **Hardened Remote Wipe**: Nonce-based remote wipe clears the response cache, usage logs, local diagnostic vault, and stored device-user identity.
 - **Privacy-Gated Telemetry**: Advanced metrics (RAM, storage, battery, network) are only collected after the server enables `advancedTelemetry`.
 
 ## 🚀 Getting Started
@@ -52,7 +52,17 @@ The Lock Screen, warning banner, and diagnostics overlay are all **built in** �
 
 ```yaml
 dependencies:
-  dev_guard: ^1.0.1
+  dev_guard: ^1.0.2
+```
+
+Or via Git:
+
+```yaml
+dependencies:
+  dev_guard:
+    git:
+      url: https://github.com/DevGuard-uk/dev_guard.git
+      ref: v1.0.2
 ```
 
 ### 3. Platform setup
@@ -188,7 +198,7 @@ To view telemetry and logs directly inside the running app:
 2. Configure a **6-digit Diagnostic Passcode**.
 3. Toggle on **Enable Diagnostic Logs** (beta feature) for the desired devices.
 4. A floating **bug icon** appears in your app.
-5. Tap it and enter your passcode to view device telemetry and encrypted error vaults.
+5. Tap it and enter your passcode to view device telemetry and diagnostic vaults.
 
 ## ⚙️ Configuration
 
@@ -213,16 +223,15 @@ When **Advanced Telemetry** is enabled in the Admin Panel, the plugin may attach
 
 ## 🔐 Security Best Practices
 
-1. **Obfuscation (two layers)**:
-   - **SDK**: Wire protocol and native symbols are hardened inside the plugin (runtime XOR decode + opaque FFI exports).
-   - **Your app**: Always build release with `--obfuscate --split-debug-info=./debug_info`:
-     ```bash
-     flutter build apk --obfuscate --split-debug-info=./debug_info
-     flutter build ios --obfuscate --split-debug-info=./debug_info
-     ```
-2. **Master Secret**: Never commit your Master Secret to source control.
-3. **Response signing**: Invalid server response signatures lock the app immediately.
-4. **Jailbreak / root**: Compromised devices are locked via `root_jailbreak_guard`.
+1. **Release builds**: Always build release with `--obfuscate --split-debug-info=./debug_info`:
+   ```bash
+   flutter build apk --obfuscate --split-debug-info=./debug_info
+   flutter build ios --obfuscate --split-debug-info=./debug_info
+   ```
+2. **Native hardening**: Wire protocol and lock-screen integrity are protected inside the compiled native library.
+3. **Master Secret**: Never commit your Master Secret to source control.
+4. **Response signing**: Invalid server response signatures lock the app immediately.
+5. **Jailbreak / root**: Compromised devices are locked via `root_jailbreak_guard`.
 
 ## 💬 Support & Contact
 
@@ -235,4 +244,4 @@ When **Advanced Telemetry** is enabled in the Admin Panel, the plugin may attach
 MIT © [DevGuard](https://devguard.uk)
 
 ---
-*Secure by Design. Managed by Ants Solution.*
+*Secure by Design. Managed by You.*

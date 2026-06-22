@@ -4,26 +4,36 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-06-22
+
+### Added
+- **`resolveBrandingFooter`**: shared helper for Enterprise white-label lock-screen footer copy and palette.
+
+### Changed
+- Default lock-screen palette when no branding colors are sent: `#d32f2f` / `#b71c1c`.
+- Initial wrapper state is `ACTIVE` (no “Verifying license status…” flash before the first sync).
+- Unlock key field uses obscured input.
+- Brand website link shows a snackbar when the URL cannot be opened.
+
 ## [1.0.1] - 2026-06-20
 
 ### Added
-- **SDK obfuscation layer**: Runtime XOR decode for protocol, storage, logger, and lock-screen literals.
-- **Opaque native FFI exports** (`dg_x9` … `dg_e1`) and **policy gate** `DevGuardFFI.evaluatePolicy()` for emulator / compromised-device locks.
-- **`tool/gen_obf.dart`**: regenerates encoded string table (maintainers).
+- **Native security hardening** for protocol integrity and lock-screen protection.
+- **Emulator and compromised-device blocking** via native policy checks.
 
 ### Changed
-- `RestChecker`, `DevGuardLogger`, cache/token services, and `PaymentWall` default copy now use `Obf.*` instead of plaintext strings.
-- Rebuilt Android `.so` and iOS `xcframework` with renamed exports.
+- Improved resilience of network communication and local storage handling.
+- Updated native libraries for Android and iOS.
 
 ### Documentation
-- README: emulator blocking, two-layer obfuscation guidance, security best practices, and expanded feature descriptions.
+- README: emulator blocking, security best practices, and expanded feature descriptions.
 
 ## [1.0.0] - 2026-06-13
 
 Initial public release.
 
 ### Added
-- **Native Security (FFI)**: SHA256 signing via compiled binary.
+- **Native Security**: SHA256 signing via compiled binary.
 - **REST Protocol**: Secure telemetry tunnel.
 - **Glassmorphic Lock Screen**: WhatsApp / Email / Call support buttons and optional unlock-key entry.
 - **Warning Banner**: Non-blocking in-app payment / license reminders.

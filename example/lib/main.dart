@@ -4,105 +4,66 @@ import 'package:flutter/material.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Master Secret is required for all projects. Pass your secret from Settings → Master Secret:
-  //
-  //   await DevGuard.init(
-  //     projectId: 'your_project_id',
-  //     secret: 'YOUR_UNIQUE_SECRET',
-  //     failSafe: FailSafe.open,
-  //   );
   await DevGuard.init(
     projectId: 'your_project_id',
     secret: 'YOUR_MASTER_SECRET',
     failSafe: FailSafe.open,
   );
 
-  runApp(const MyApp());
+  runApp(const DevGuardExampleApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class DevGuardExampleApp extends StatelessWidget {
+  const DevGuardExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return DevGuard.wrap(
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData.dark(),
-        home: Builder(
-          builder: (context) {
-            return Scaffold(
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Main Application Content',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 20),
+    return MaterialApp(
+      title: 'DevGuard Example',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6C47FF)),
+        useMaterial3: true,
+      ),
+      home: DevGuardWrapper(
+        child: const DevGuardWelcomeScreen(),
+      ),
+    );
+  }
+}
 
-                    // --- REMOTE CONFIG EXAMPLE ---
-                    StreamBuilder<GuardResponse?>(
-                      stream: DevGuard.onStatusChanged,
-                      initialData: DevGuard.currentResponse,
-                      builder: (context, snapshot) {
-                        final response = snapshot.data;
-                        final extra = response?.extraData ?? {};
+class DevGuardWelcomeScreen extends StatelessWidget {
+  const DevGuardWelcomeScreen({super.key});
 
-                        if (extra['showBetaBadge'] == true) {
-                          return Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.amber,
-                              borderRadius: BorderRadius.circular(30),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.amber.withValues(alpha: 0.3),
-                                  blurRadius: 10,
-                                  spreadRadius: 2,
-                                ),
-                              ],
-                            ),
-                            child: const Text(
-                              'BETA ACCESS ENABLED',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 12,
-                                letterSpacing: 1.1,
-                              ),
-                            ),
-                          );
-                        }
-                        return const SizedBox.shrink();
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () async {
-                        await DevGuard.setDeviceUser(
-                          username: 'example_user',
-                          email: 'user@example.com',
-                          phone: '+1234567890',
-                          customData: {'plan': 'premium'},
-                        );
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('User registered for portal tracking.')),
-                          );
-                        }
-                      },
-                      child: const Text('Set User'),
-                    ),
-                  ],
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF0F172A),
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.shield_outlined, size: 72, color: Color(0xFF6C47FF)),
+                const SizedBox(height: 24),
+                const Text(
+                  'DevGuard Secure',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
-            );
-          }
+                const SizedBox(height: 12),
+                Text(
+                  'Replace your_project_id and YOUR_MASTER_SECRET in main.dart with credentials from devguard.uk',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

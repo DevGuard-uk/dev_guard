@@ -47,8 +47,8 @@ class _DevGuardWrapperState extends State<DevGuardWrapper>
     _response =
         widget.initialResponse ??
         GuardResponse(
-          status: LicenseStatus.pending,
-          message: 'Verifying license status...',
+          status: LicenseStatus.active,
+          message: '',
         );
 
     _statusSubscription = widget.instance.onStatusChanged.listen((response) {

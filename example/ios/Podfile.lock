@@ -3,7 +3,7 @@ PODS:
     - Flutter
   - connectivity_plus (0.0.1):
     - Flutter
-  - dev_guard (0.0.1):
+  - dev_guard (1.0.0):
     - Flutter
   - device_info_plus (0.0.1):
     - Flutter
@@ -69,7 +69,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   battery_plus: b42253f6d2dde71712f8c36fef456d99121c5977
   connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
-  dev_guard: 66d18cda6eb88c15c315e2fdc0c26958f7242e56
+  dev_guard: 27ef3ba8b8fc9a9e93a664c788e50e5240e0636e
   device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_secure_storage_darwin: acdb3f316ed05a3e68f856e0353b133eec373a23
