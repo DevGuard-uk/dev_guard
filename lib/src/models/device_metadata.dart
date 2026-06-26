@@ -24,6 +24,10 @@ class DeviceMetadata {
   final String? deviceToken;
   final String? fingerprint;
   final String? location;
+  final String? sdkRuntime;
+  final String? sdkVersion;
+  final String? hostPlatform;
+  final String? hostPlatformVersion;
 
   const DeviceMetadata({
     required this.deviceId,
@@ -49,6 +53,10 @@ class DeviceMetadata {
     this.deviceToken,
     this.fingerprint,
     this.location,
+    this.sdkRuntime,
+    this.sdkVersion,
+    this.hostPlatform,
+    this.hostPlatformVersion,
   });
 
   Map<String, dynamic> toQueryParameters() {
@@ -76,6 +84,10 @@ class DeviceMetadata {
       if (deviceToken != null) 'deviceToken': deviceToken,
       if (fingerprint != null) 'fingerprint': fingerprint,
       if (location != null) 'location': location,
+      if (sdkRuntime != null) 'sdkRuntime': sdkRuntime,
+      if (sdkVersion != null) 'sdkVersion': sdkVersion,
+      if (hostPlatform != null) 'hostPlatform': hostPlatform,
+      if (hostPlatformVersion != null) 'hostPlatformVersion': hostPlatformVersion,
     };
   }
 }

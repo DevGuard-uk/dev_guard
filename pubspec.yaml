@@ -1,6 +1,6 @@
 name: dev_guard
 description: "A high-performance remote licensing and app-protection plugin for Flutter. Secured by HMAC signatures and native FFI (Secure Enclave), it enables developers to remotely lock, warn, or sync applications via the DevGuard REST API."
-version: 1.0.2
+version: 1.0.4
 homepage: https://github.com/DevGuard-uk/dev_guard
 repository: https://github.com/DevGuard-uk/dev_guard
 issue_tracker: https://github.com/DevGuard-uk/dev_guard/issues

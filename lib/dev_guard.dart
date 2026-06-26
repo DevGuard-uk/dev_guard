@@ -4,6 +4,7 @@ import 'src/models/guard_response.dart';
 export 'src/dev_guard_instance.dart' show DevGuardInstance, FailSafe;
 export 'src/models/license_status.dart';
 export 'src/models/guard_response.dart';
+export 'src/services/plugin_crash_reporter.dart' show PluginCrashReporter;
 
 /// Static convenience API — delegates to [DevGuardInstance.shared].
 class DevGuard {
@@ -20,7 +21,8 @@ class DevGuard {
   ///   Portal/developer projects must pass this; admins whose project has no
   ///   secret configured may omit it.
   /// [failSafe] — offline-with-no-cache behavior ([FailSafe.open] default).
-  /// [statusUrl] — optional custom API endpoint.
+  /// [statusUrl] — optional DevGuard API endpoint. Must use HTTPS on
+  /// devguard.uk (defaults to the production API).
   /// [apiKey] — deprecated alias for [secret].
   static Future<void> init({
     required String projectId,

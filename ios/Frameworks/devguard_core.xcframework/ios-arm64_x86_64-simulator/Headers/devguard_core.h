@@ -25,5 +25,7 @@ DEVGUARD_EXPORT void dg_x6(
 DEVGUARD_EXPORT void dg_d7(const char* passcode, const char* salt, char* output);
 DEVGUARD_EXPORT int dg_r8(void);
 DEVGUARD_EXPORT int dg_e1(int block_emulators, int is_physical, int is_compromised);
+DEVGUARD_EXPORT void dg_u1(char* output);
+DEVGUARD_EXPORT int dg_u2(const char* url);
 
 #endif // DEVGUARD_CORE_H

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
+import '../constants/sdk_identity.dart';
 import 'package:android_id/android_id.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -54,6 +55,8 @@ class HardwareService {
     String? model;
     String? brand;
     String? os;
+    String? hostPlatform;
+    String? hostPlatformVersion;
     bool isPhysicalDevice = true;
 
     if (Platform.isAndroid) {
@@ -63,6 +66,8 @@ class HardwareService {
       model = androidInfo.model;
       brand = androidInfo.brand;
       os = 'Android ${androidInfo.version.release}';
+      hostPlatform = 'android';
+      hostPlatformVersion = androidInfo.version.release;
       isPhysicalDevice = androidInfo.isPhysicalDevice;
     } else if (Platform.isIOS) {
       final iosInfo = await deviceInfo.iosInfo;
@@ -71,6 +76,8 @@ class HardwareService {
       model = iosInfo.utsname.machine;
       brand = 'Apple';
       os = 'iOS ${iosInfo.systemVersion}';
+      hostPlatform = 'ios';
+      hostPlatformVersion = iosInfo.systemVersion;
       isPhysicalDevice = iosInfo.isPhysicalDevice;
     }
 
@@ -116,6 +123,10 @@ class HardwareService {
       storage: _advancedTelemetry ? await _getStorage() : null,
       ram: _advancedTelemetry ? await _getRAM() : null,
       location: _advancedTelemetry ? await _getLocationPassive() : null,
+      sdkRuntime: kSdkRuntime,
+      sdkVersion: kSdkVersion,
+      hostPlatform: hostPlatform,
+      hostPlatformVersion: hostPlatformVersion,
     );
   }
 

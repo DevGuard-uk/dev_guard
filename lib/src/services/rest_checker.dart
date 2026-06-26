@@ -9,18 +9,23 @@ import '../models/guard_response.dart';
 import '../models/status_fetch_result.dart';
 import 'dev_guard_logger.dart';
 import 'status_checker.dart';
+import 'status_url_resolver.dart';
 
 class RestChecker implements StatusChecker {
   final String baseUrl;
   final String? secret;
 
-  RestChecker({required this.baseUrl, this.secret});
+  RestChecker({required String baseUrl, this.secret})
+      : baseUrl = resolveStatusUrl(baseUrl);
 
   Map<String, String> _authHeaders({
     required String signature,
     required int timestamp,
     bool includeTunnel = false,
   }) {
+    if (!DevGuardFFI.isAllowedStatusUrl(baseUrl)) {
+      return {Obf.contentType: Obf.appJson};
+    }
     final headers = <String, String>{
       Obf.contentType: Obf.appJson,
       Obf.hdrSig: signature,
@@ -38,6 +43,9 @@ class RestChecker implements StatusChecker {
     String projectId, {
     DeviceMetadata? metadata,
   }) async {
+    if (!DevGuardFFI.isAllowedStatusUrl(baseUrl)) {
+      return const StatusFetchResult(failure: StatusFetchFailure.networkError);
+    }
     try {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final signature = DevGuardFFI.generateSignature(projectId, timestamp);
@@ -118,6 +126,9 @@ class RestChecker implements StatusChecker {
 
   @override
   Future<bool> verifyAndUnlock(String projectId, String hashedKey) async {
+    if (!DevGuardFFI.isAllowedStatusUrl(baseUrl)) {
+      return false;
+    }
     try {
       final uri = Uri.parse(baseUrl);
       final unlockSegment = Obf.unlock;
