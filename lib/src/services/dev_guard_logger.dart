@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_vault_logger/flutter_vault_logger.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../ffi/devguard_ffi.dart';
 import '../internal/_obf.dart';
+import 'plugin_crash_reporter.dart';
 
 /// Internal logging service for DevGuard.
 /// 
@@ -75,6 +77,15 @@ class DevGuardLogger {
       error,
       stackTrace: stackTrace,
       context: context ?? 'ERROR',
+    );
+
+    unawaited(
+      PluginCrashReporter.report(
+        error: error,
+        stackTrace: stackTrace,
+        context: context,
+        crashType: 'vault_error',
+      ),
     );
   }
 

@@ -10,9 +10,11 @@ import 'services/cache_service.dart';
 import 'services/dev_guard_logger.dart';
 import 'services/hardware_service.dart';
 import 'services/remote_wipe_service.dart';
+import 'services/plugin_crash_reporter.dart';
 import 'services/rest_checker.dart';
 import 'services/secure_storage_service.dart';
 import 'services/status_checker.dart';
+import 'services/status_url_resolver.dart';
 import 'services/sync_policy_service.dart';
 import 'services/usage_logger.dart';
 import 'services/device_token_service.dart';
@@ -66,7 +68,8 @@ class DevGuardInstance {
   /// [secret] — your account **Master Secret** (Settings → Master Secret).
   ///   Required for portal/developer projects so requests authenticate against
   ///   your account. Admins whose projects have no secret configured may omit it.
-  /// [statusUrl] — override the API endpoint (defaults to the DevGuard API).
+  /// [statusUrl] — optional DevGuard API endpoint override. Must use HTTPS on
+  /// the devguard.uk domain (for example `https://api.devguard.uk/devguard`).
   /// [failSafe] — behavior when offline with no cache ([FailSafe.open] / [FailSafe.closed]).
   /// [apiKey] — deprecated alias for [secret].
   Future<void> init({
@@ -80,8 +83,21 @@ class DevGuardInstance {
       _projectId = projectId;
       _failSafe = failSafe;
 
-      final effectiveUrl = statusUrl ?? defaultStatusUrl;
+      final effectiveUrl = resolveStatusUrl(statusUrl);
       _checker = RestChecker(baseUrl: effectiveUrl, secret: secret ?? apiKey);
+
+      PluginCrashReporter.configure(
+        projectId: projectId,
+        secret: secret ?? apiKey,
+        baseUrl: effectiveUrl,
+        metadataProvider: () async {
+          if (!isInitialized) return null;
+          final metadata = await HardwareService(
+            cachedResponse: _cachedResponse,
+          ).collect();
+          return metadata.toQueryParameters();
+        },
+      );
 
       UsageLogger.configure(responseProvider: () => _cachedResponse);
 

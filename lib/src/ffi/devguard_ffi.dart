@@ -63,6 +63,12 @@ typedef _GetTotalRamMbDart = int Function();
 typedef _EvaluatePolicyC = Int32 Function(Int32 blockEmulators, Int32 isPhysical, Int32 isCompromised);
 typedef _EvaluatePolicyDart = int Function(int blockEmulators, int isPhysical, int isCompromised);
 
+typedef _DefaultStatusUrlC = Void Function(Pointer<Utf8> output);
+typedef _DefaultStatusUrlDart = void Function(Pointer<Utf8> output);
+
+typedef _IsAllowedStatusUrlC = Int32 Function(Pointer<Utf8> url);
+typedef _IsAllowedStatusUrlDart = int Function(Pointer<Utf8> url);
+
 class DevGuardFFI {
   static DynamicLibrary? _lib;
   static _GenerateSignatureDart? _generateSignatureFunc;
@@ -74,6 +80,8 @@ class DevGuardFFI {
   static _DeriveLogKeyDart? _deriveLogKeyFunc;
   static _GetTotalRamMbDart? _getTotalRamMbFunc;
   static _EvaluatePolicyDart? _evaluatePolicyFunc;
+  static _DefaultStatusUrlDart? _defaultStatusUrlFunc;
+  static _IsAllowedStatusUrlDart? _isAllowedStatusUrlFunc;
 
   static bool _initialized = false;
   static bool _nativeAvailable = false;
@@ -127,6 +135,12 @@ class DevGuardFFI {
       );
       _evaluatePolicyFunc = _lib!.lookupFunction<_EvaluatePolicyC, _EvaluatePolicyDart>(
         Obf.symE1,
+      );
+      _defaultStatusUrlFunc = _lib!.lookupFunction<_DefaultStatusUrlC, _DefaultStatusUrlDart>(
+        Obf.symU1,
+      );
+      _isAllowedStatusUrlFunc = _lib!.lookupFunction<_IsAllowedStatusUrlC, _IsAllowedStatusUrlDart>(
+        Obf.symU2,
       );
       _nativeAvailable = true;
     } catch (_) {
@@ -297,6 +311,43 @@ class DevGuardFFI {
     if (isCompromised) return PolicyLock.compromised;
     if (blockEmulators && !isPhysicalDevice) return PolicyLock.emulator;
     return PolicyLock.allow;
+  }
+
+  /// Default HTTPS status endpoint reconstructed from native obfuscated segments.
+  static String defaultStatusUrl() {
+    if (!_initialized) init();
+    if (_nativeAvailable && _defaultStatusUrlFunc != null) {
+      final ptrOutput = calloc<Int8>(128).cast<Utf8>();
+      try {
+        _defaultStatusUrlFunc!(ptrOutput);
+        return ptrOutput.toDartString();
+      } finally {
+        calloc.free(ptrOutput);
+      }
+    }
+    return Obf.defaultApiUrl;
+  }
+
+  /// Returns true when [url] is HTTPS and the host is devguard.uk or a subdomain.
+  static bool isAllowedStatusUrl(String url) {
+    if (!_initialized) init();
+    if (_nativeAvailable && _isAllowedStatusUrlFunc != null) {
+      final ptrUrl = url.toNativeUtf8();
+      try {
+        return _isAllowedStatusUrlFunc!(ptrUrl) == 1;
+      } finally {
+        calloc.free(ptrUrl);
+      }
+    }
+    return _dartIsAllowedStatusUrl(url);
+  }
+
+  static bool _dartIsAllowedStatusUrl(String url) {
+    final parsed = Uri.tryParse(url);
+    if (parsed == null || !parsed.isScheme('https')) return false;
+    final host = parsed.host.toLowerCase();
+    final suffix = Obf.allowedApiHostSuffix;
+    return host == suffix || host.endsWith('.$suffix');
   }
 
   static String _dartTokenScramble(String input) {

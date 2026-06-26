@@ -10,56 +10,34 @@ void main() async {
     failSafe: FailSafe.open,
   );
 
-  runApp(const DevGuardExampleApp());
+  runApp(const MyApp());
 }
 
-class DevGuardExampleApp extends StatelessWidget {
-  const DevGuardExampleApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'DevGuard Example',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6C47FF)),
-        useMaterial3: true,
-      ),
-      home: DevGuardWrapper(
-        child: const DevGuardWelcomeScreen(),
-      ),
-    );
-  }
-}
-
-class DevGuardWelcomeScreen extends StatelessWidget {
-  const DevGuardWelcomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
+    return DevGuard.wrap(
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData.dark(),
+        home: Scaffold(
+          body: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.shield_outlined, size: 72, color: Color(0xFF6C47FF)),
-                const SizedBox(height: 24),
                 const Text(
-                  'DevGuard Secure',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                  'DevGuard Example',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  'Replace your_project_id and YOUR_MASTER_SECRET in main.dart with credentials from devguard.uk',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
+                const SizedBox(height: 16),
+                StreamBuilder(
+                  stream: DevGuard.onStatusChanged,
+                  builder: (context, snapshot) {
+                    final status = DevGuard.currentResponse?.status;
+                    return Text('Status: ${status?.name ?? 'pending'}');
+                  },
                 ),
               ],
             ),
