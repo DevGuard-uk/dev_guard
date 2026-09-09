@@ -42,7 +42,7 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  device_info_plus: ^13.1.0
+  device_info_plus: ^13.2.0
   http: ^1.6.0
 
 dev_dependencies:
@@ -68,6 +68,10 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  # Plugin ships via CocoaPods + vendored xcframework (no Package.swift yet).
+  # Flutter 3.47+ enables Swift Package Manager by default; keep the example on pods.
+  config:
+    enable-swift-package-manager: false
 
   # To add assets to your application, add an assets section, like this:
   # assets:

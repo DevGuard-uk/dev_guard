@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- **User Journey** (`DevGuard.setUserLog`): optional compact UI-step trail for Developer Portal and Console. Uploaded on heartbeat only when the project plan includes User Journey.
+
+### Changed
+- Lifecycle debounce expands from 5 to 10 minutes when the device is in power-saver mode or battery is below 20% while discharging.
+- Raised Android companion packages for AGP 9 readiness: `android_id` ^0.5.2, `battery_plus` ^7.1.1, `device_info_plus` ^13.2.0, `package_info_plus` ^10.2.1, `root_jailbreak_guard` ^1.1.1.
+- Example iOS: if `pod install` fails on `IOSSecuritySuite` 1.9.x after `root_jailbreak_guard` ^1.1.1, delete `ios/Podfile.lock` and re-run `pod install --repo-update`.
+
 ## [1.0.4] - 2026-06-26
 
 ### Security

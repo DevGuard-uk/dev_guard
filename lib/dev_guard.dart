@@ -60,4 +60,23 @@ class DevGuard {
         phone: phone,
         customData: customData,
       );
+
+  /// Records a User Journey UI step for Portal/Console timelines.
+  ///
+  /// Never throws. Empty [screen] is ignored. Uploaded only when the plan
+  /// enables `betaFeatures.userJourney`.
+  static Future<void> setUserLog({
+    required String screen,
+    String? widget,
+    String? className,
+    String action = 'view',
+    Map<String, dynamic>? extras,
+  }) =>
+      instance.setUserLog(
+        screen: screen,
+        widget: widget,
+        className: className,
+        action: action,
+        extras: extras,
+      );
 }

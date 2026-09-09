@@ -1,7 +1,14 @@
 # DevGuard (Flutter)
 
 <p align="center">
+  <a href="https://devguard.uk">
+    <img src="assets/logo.png" alt="DevGuard" width="120" height="120" />
+  </a>
+</p>
+
+<p align="center">
   <a href="https://devguard.uk"><img src="https://img.shields.io/badge/website-devguard.uk-6C47FF?style=flat-square" alt="Website" /></a>
+  <a href="https://github.com/DevGuard-uk/dev_guard"><img src="https://img.shields.io/badge/github-DevGuard--uk-181717?style=flat-square" alt="GitHub" /></a>
   <img src="https://img.shields.io/badge/platforms-iOS%20%7C%20Android-2D7DD2?style=flat-square" alt="Platforms" />
   <img src="https://img.shields.io/badge/license-MIT-3CB371?style=flat-square" alt="License" />
 </p>
@@ -39,6 +46,7 @@ The Lock Screen, warning banner, and diagnostics overlay are all **built in** �
 - **Emulator Blocking**: When the project enables `blockEmulators`, the SDK locks on emulators/simulators automatically.
 - **Hardened Remote Wipe**: Nonce-based remote wipe clears the response cache, usage logs, local diagnostic vault, and stored device-user identity.
 - **Privacy-Gated Telemetry**: Advanced metrics (RAM, storage, battery, network) are only collected after the server enables `advancedTelemetry`.
+- **User Journey**: Optional `DevGuard.setUserLog` steps reconstruct screens/widgets in the Developer Portal (when the plan entitles User Journey).
 
 ## 🚀 Getting Started
 
@@ -166,6 +174,7 @@ StreamBuilder<GuardResponse?>(
 | `DevGuard.onStatusChanged` | Stream of status updates from the server. |
 | `DevGuard.syncStatus()` | Manually trigger a license sync. |
 | `DevGuard.setDeviceUser(...)` | Register the signed-in app user so they appear in the Developer Portal. |
+| `DevGuard.setUserLog(...)` | Record a compact UI step for the User Journey tab (plan-gated upload). |
 
 ### Track app users in the Developer Portal
 
@@ -183,6 +192,19 @@ await DevGuard.setDeviceUser(
 ```
 
 Open **Developer Portal → Users** to view your app's user base and engagement.
+
+### User Journey (optional)
+
+Call `DevGuard.setUserLog` on important screens so **Developer Portal → User Journey** can reconstruct the path (screen, optional widget/class, action). Steps upload on the next heartbeat only when the org plan includes **User Journey**.
+
+```dart
+await DevGuard.setUserLog(
+  screen: 'cart-page',
+  widget: 'CheckoutCTA',
+  className: 'CartPage',
+  action: 'view',
+);
+```
 
 ### Custom events
 

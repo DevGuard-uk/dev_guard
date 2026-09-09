@@ -3,7 +3,7 @@ PODS:
     - Flutter
   - connectivity_plus (0.0.1):
     - Flutter
-  - dev_guard (1.0.0):
+  - dev_guard (1.0.4):
     - Flutter
   - device_info_plus (0.0.1):
     - Flutter
@@ -16,12 +16,12 @@ PODS:
     - FlutterMacOS
   - integration_test (0.0.1):
     - Flutter
-  - IOSSecuritySuite (1.9.11)
+  - IOSSecuritySuite (2.2.0)
   - package_info_plus (0.4.5):
     - Flutter
-  - root_jailbreak_guard (1.0.0):
+  - root_jailbreak_guard (1.1.0):
     - Flutter
-    - IOSSecuritySuite (~> 1.9.0)
+    - IOSSecuritySuite (~> 2.2.0)
   - url_launcher_ios (0.0.1):
     - Flutter
 
@@ -69,17 +69,17 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   battery_plus: b42253f6d2dde71712f8c36fef456d99121c5977
   connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
-  dev_guard: 27ef3ba8b8fc9a9e93a664c788e50e5240e0636e
+  dev_guard: f11ac2b95d7876eb754236db179372d14e9c0153
   device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
-  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  flutter_secure_storage_darwin: acdb3f316ed05a3e68f856e0353b133eec373a23
+  Flutter: 71a624a5bc0c04062bf19101d501e466baf2fb47
+  flutter_secure_storage_darwin: 46e401699982ee74142909676535e0f6a7321e58
   geolocator_apple: ab36aa0e8b7d7a2d7639b3b4e48308394e8cef5e
   integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
-  IOSSecuritySuite: b51056d5411aee567153ca86ce7f6edfdc5d2654
+  IOSSecuritySuite: ba76f34cb367b9230934ac37904e26a40d033e3d
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
-  root_jailbreak_guard: f021f0f67de14235b9194142e43d1489de8ac4cc
+  root_jailbreak_guard: d92943e935cf79e25ad8be7017556101cec2c3a1
   url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
 
-PODFILE CHECKSUM: ce2a4dd764e1c7aeed6a7cdc5e61d092b6dc6d32
+PODFILE CHECKSUM: 225dbbc409c575cecac6a85b5c007ae4861210c3
 
 COCOAPODS: 1.16.2

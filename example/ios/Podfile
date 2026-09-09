@@ -1,5 +1,8 @@
 platform :ios, '15.0'
 
+# root_jailbreak_guard ^1.1.1 needs IOSSecuritySuite ~> 2.2.0.
+# If pod install fails on a stale 1.9.x lock: rm -f Podfile.lock && pod install --repo-update
+
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
