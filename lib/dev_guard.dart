@@ -1,9 +1,12 @@
 import 'package:flutter/widgets.dart';
 import 'src/dev_guard_instance.dart';
 import 'src/models/guard_response.dart';
+import 'src/services/diagnostic_batch_service.dart';
 export 'src/dev_guard_instance.dart' show DevGuardInstance, FailSafe;
 export 'src/models/license_status.dart';
 export 'src/models/guard_response.dart';
+export 'src/services/diagnostic_batch_service.dart' show DiagnosticBatchService, DiagnosticBatchResult;
+export 'src/services/diagnostic_outbox.dart' show DiagnosticOutbox, DiagnosticRecord;
 export 'src/services/plugin_crash_reporter.dart' show PluginCrashReporter;
 
 /// Static convenience API — delegates to [DevGuardInstance.shared].
@@ -23,17 +26,21 @@ class DevGuard {
   /// [failSafe] — offline-with-no-cache behavior ([FailSafe.open] default).
   /// [statusUrl] — optional DevGuard API endpoint. Must use HTTPS on
   /// devguard.uk (defaults to the production API).
+  /// [sdkKey] — preferred per-project ingest key (Portal → Project SDK key).
+  /// Falls back to [secret] / deprecated [apiKey] (account Master Secret).
   /// [apiKey] — deprecated alias for [secret].
   static Future<void> init({
     required String projectId,
     String? secret,
+    String? sdkKey,
     String? statusUrl,
-    @Deprecated('Use `secret` (Settings → Master Secret) instead.') String? apiKey,
+    @Deprecated('Use `secret` or `sdkKey` instead.') String? apiKey,
     FailSafe failSafe = FailSafe.open,
   }) =>
       instance.init(
         projectId: projectId,
         secret: secret,
+        sdkKey: sdkKey,
         statusUrl: statusUrl,
         // ignore: deprecated_member_use_from_same_package
         apiKey: apiKey,
@@ -79,4 +86,12 @@ class DevGuard {
         action: action,
         extras: extras,
       );
+
+  /// Exports local AES-256 encrypted vault diagnostic logs and uploads them to the DevGuard API.
+  static Future<bool> uploadRawVault({String triggerSource = 'manual_request'}) =>
+      instance.uploadRawVault(triggerSource: triggerSource);
+
+  /// Flushes pending diagnostic outbox records to the server.
+  static Future<DiagnosticBatchResult> flushDiagnosticBatch() =>
+      instance.flushDiagnosticBatch();
 }

@@ -5,9 +5,11 @@
 Pod::Spec.new do |s|
   s.name             = 'dev_guard'
   s.version          = '1.0.4'
-  s.summary          = 'Remote licensing and app protection for Flutter'
-  s.description      = 'HMAC-signed REST telemetry, lock screens, and native security hardening for Flutter apps.'
-  s.homepage         = 'https://github.com/DevGuard-uk/dev_guard'
+  s.summary          = 'A new Flutter FFI plugin project.'
+  s.description      = <<-DESC
+A new Flutter FFI plugin project.
+                       DESC
+  s.homepage         = 'http://example.com'
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Your Company' => 'email@example.com' }
 
